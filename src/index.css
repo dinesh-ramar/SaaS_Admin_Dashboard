@@ -1,0 +1,96 @@
+/* Custom Fonts */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  src: url('./fonts/PlusJakartaSans-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  src: url('./fonts/PlusJakartaSans-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('./fonts/Inter_18pt-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('./fonts/Inter_24pt-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: 15 118 110;
+  /* #0F766E */
+  --color-success: 22 101 52;
+  /* #166534 */
+  --color-warning: 146 64 14;
+  /* #92400E */
+  --color-error: 153 27 27;
+  /* #991B1B */
+
+  --color-app-bg: 248 250 252;
+  /* #F8FAFC */
+  --color-card: 255 255 255;
+  /* #FFFFFF */
+  --color-text-primary: 15 23 42;
+  /* #0F172A */
+  --color-text-muted: 71 85 105;
+  /* #475569 */
+  --color-border: 203 213 225;
+  /* #CBD5E1 */
+}
+
+/* Explicitly target both :root with .dark and any element with .dark */
+:root.dark,
+.dark {
+  /* Use a lighter teal for text on dark backgrounds to ensure contrast */
+  --color-primary: 45 212 191;
+  /* #2DD4BF (teal-400) */
+  --color-success: 74 222 128;
+  /* #4ADE80 (green-400) */
+  --color-warning: 251 191 36;
+  /* #FBBF24 (amber-400) */
+  --color-error: 248 113 113;
+  /* #F87171 (red-400) */
+
+  --color-app-bg: 15 23 42;
+  /* #0F172A (slate-900) */
+  --color-card: 30 41 59;
+  /* #1E293B (slate-800) */
+  --color-text-primary: 241 245 249;
+  /* #F1F5F9 (slate-100) */
+  --color-text-muted: 148 163 184;
+  /* #94A6B8 (slate-400) */
+  --color-border: 51 65 85;
+  /* #334155 (slate-700) */
+}
+
+@layer base {
+  body {
+    @apply antialiased transition-colors duration-200;
+    background-color: rgb(var(--color-app-bg));
+    color: rgb(var(--color-text-primary));
+  }
+
+  /* Additional accessibility: ensure focus ring matches primary */
+  :focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-app-bg;
+  }
+}
