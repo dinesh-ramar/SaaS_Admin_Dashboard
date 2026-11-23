@@ -7,7 +7,7 @@ const Button = ({
     children,
     variant = 'primary',
     isLoading = false,
-    className,
+    className = '',
     disabled,
     type = 'button',
     ...props

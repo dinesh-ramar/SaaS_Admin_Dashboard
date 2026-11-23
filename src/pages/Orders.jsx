@@ -1,20 +1,29 @@
 import React, { useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { orderService } from '../services/api';
 import { useFetch } from '../hooks/useFetch';
 import Table from '../components/common/Table';
 import Card from '../components/common/Card';
 import Badge from '../components/common/Badge';
+import {
+    ORDER_STATUS_LABELS,
+    ORDER_STATUS_VARIANTS,
+} from '../types/order';
 
-// Extracted cell renderers for better performance and clean code
 const OrderIdCell = (row) => (
-    <span className="font-medium text-primary">ORD-{row.id}</span>
+    <Link
+        to={`/orders/${row.id}`}
+        className="font-medium text-primary hover:underline"
+    >
+        ORD-{row.id}
+    </Link>
 );
 
 const ItemsCell = (row) => (
     <div className="flex flex-col">
         <span className="text-sm">{row.products.length} Items</span>
         <span className="text-xs text-textMuted truncate max-w-[200px]">
-            {row.products.map(p => p.title).join(', ')}
+            {row.products.map((p) => p.title).join(', ')}
         </span>
     </div>
 );
@@ -27,18 +36,20 @@ const DiscountCell = (row) => (
     <span className="text-success">${row.discountedTotal.toFixed(2)}</span>
 );
 
-const StatusCell = (row) => {
-    // Helper to determine status and variant
-    const getStatusInfo = (id) => {
-        const statusMap = { 0: 'Pending', 1: 'Shipped', 2: 'Delivered' };
-        const variantMap = { 'Delivered': 'success', 'Shipped': 'primary', 'Pending': 'warning' };
-        const status = statusMap[id % 3];
-        return { status, variant: variantMap[status] };
-    };
+const StatusCell = (row) => (
+    <Badge variant={ORDER_STATUS_VARIANTS[row.status] || 'neutral'}>
+        {ORDER_STATUS_LABELS[row.status] || row.status}
+    </Badge>
+);
 
-    const { status, variant } = getStatusInfo(row.id);
-    return <Badge variant={variant}>{status}</Badge>;
-};
+const ActionCell = (row) => (
+    <Link
+        to={`/orders/${row.id}`}
+        className="text-sm font-medium text-primary hover:underline"
+    >
+        {row.status === 'pending' ? 'Open' : 'View'}
+    </Link>
+);
 
 const Orders = () => {
     const { data, loading, error, fetchData } = useFetch(orderService.getAll);
@@ -51,30 +62,36 @@ const Orders = () => {
         {
             header: 'Order ID',
             accessor: 'id',
-            cell: OrderIdCell
+            cell: OrderIdCell,
         },
         {
             header: 'Items',
-            cell: ItemsCell
+            cell: ItemsCell,
         },
         {
             header: 'Total Amount',
-            cell: AmountCell
+            cell: AmountCell,
         },
         {
             header: 'Discounted',
-            cell: DiscountCell
+            cell: DiscountCell,
         },
         {
             header: 'Status',
-            cell: StatusCell
-        }
+            cell: StatusCell,
+        },
+        {
+            header: '',
+            cell: ActionCell,
+        },
     ];
 
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold font-heading text-textPrimary">Transactions & Orders</h1>
+                <h1 className="text-2xl font-bold font-heading text-textPrimary">
+                    Transactions & Orders
+                </h1>
             </div>
 
             {error ? (
@@ -94,6 +111,5 @@ const Orders = () => {
         </div>
     );
 };
-
 
 export default Orders;
