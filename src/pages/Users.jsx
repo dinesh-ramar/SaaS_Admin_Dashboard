@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { userService } from '../services/api';
 import { useFetch } from '../hooks/useFetch';
@@ -33,9 +33,20 @@ const CompanyCell = (row) => (
 );
 
 const Users = () => {
+    const [inputValue, setInputValue] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(0);
     const limit = 10;
+
+    const applySearch = useMemo(
+        () =>
+            debounce((term) => {
+                if (!validateSearchTerm(term)) return;
+                setSearchTerm(term);
+                setCurrentPage(0);
+            }, 500),
+        []
+    );
 
     const { data, loading, error, fetchData } = useFetch(
         searchTerm ? () => userService.search(searchTerm) : () => userService.getAll(limit, currentPage * limit)
@@ -43,23 +54,12 @@ const Users = () => {
 
     useEffect(() => {
         fetchData();
-    }, [fetchData, currentPage, !!searchTerm]);
-
-    const handleSearch = useCallback(
-        debounce((term) => {
-            if (validateSearchTerm(term)) {
-                setCurrentPage(0);
-                // The useEffect above will handle the fetch if searchTerm state changes 
-                // but handleSearch ensures we reset to page 0.
-            }
-        }, 500),
-        []
-    );
+    }, [fetchData, currentPage, searchTerm]);
 
     const onSearchChange = (e) => {
         const value = e.target.value;
-        setSearchTerm(value);
-        handleSearch(value);
+        setInputValue(value);
+        applySearch(value);
     };
 
     const columns = [
@@ -88,7 +88,7 @@ const Users = () => {
                 <div className="relative w-full sm:w-64">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-textMuted w-4 h-4" />
                     <Input
-                        value={searchTerm}
+                        value={inputValue}
                         onChange={onSearchChange}
                         placeholder="Search users..."
                         className="pl-10"
