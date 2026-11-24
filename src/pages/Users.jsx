@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { userService } from '../services/api';
 import { useFetch } from '../hooks/useFetch';
@@ -6,7 +6,6 @@ import Table from '../components/common/Table';
 import Card from '../components/common/Card';
 import Input from '../components/common/Input';
 import Badge from '../components/common/Badge';
-import { debounce } from '../utils/debounce';
 import { validateSearchTerm } from '../utils/validation';
 
 // Extracted cell renderers to resolve ESLint warnings and improve performance
@@ -34,33 +33,26 @@ const CompanyCell = (row) => (
 
 const Users = () => {
     const [searchTerm, setSearchTerm] = useState('');
+    const [query, setQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(0);
     const limit = 10;
 
     const { data, loading, error, fetchData } = useFetch(
-        searchTerm ? () => userService.search(searchTerm) : () => userService.getAll(limit, currentPage * limit)
+        query ? () => userService.search(query, limit, currentPage * limit) : () => userService.getAll(limit, currentPage * limit)
     );
 
     useEffect(() => {
         fetchData();
-    }, [fetchData, currentPage, !!searchTerm]);
+    }, [fetchData, currentPage, query]);
 
-    const handleSearch = useCallback(
-        debounce((term) => {
-            if (validateSearchTerm(term)) {
-                setCurrentPage(0);
-                // The useEffect above will handle the fetch if searchTerm state changes 
-                // but handleSearch ensures we reset to page 0.
-            }
-        }, 500),
-        []
-    );
-
-    const onSearchChange = (e) => {
-        const value = e.target.value;
-        setSearchTerm(value);
-        handleSearch(value);
-    };
+    useEffect(() => {
+        if (query === searchTerm || !validateSearchTerm(searchTerm)) return;
+        const timer = setTimeout(() => {
+            setCurrentPage(0);
+            setQuery(searchTerm);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [searchTerm, query]);
 
     const columns = [
         {
@@ -89,7 +81,7 @@ const Users = () => {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-textMuted w-4 h-4" />
                     <Input
                         value={searchTerm}
-                        onChange={onSearchChange}
+                        onChange={e => setSearchTerm(e.target.value)}
                         placeholder="Search users..."
                         className="pl-10"
                     />
@@ -111,7 +103,7 @@ const Users = () => {
                     {/* Pagination */}
                     <div className="px-6 py-4 flex items-center justify-between border-t border-border bg-app-bg transition-colors duration-200">
                         <div className="text-sm text-textMuted">
-                            Showing <span className="font-medium text-textPrimary">{currentPage * limit + 1}</span> to <span className="font-medium text-textPrimary">{Math.min((currentPage + 1) * limit, totalUsers)}</span> of <span className="font-medium text-textPrimary">{totalUsers}</span> users
+                            Showing <span className="font-medium text-textPrimary">{totalUsers ? currentPage * limit + 1 : 0}</span> to <span className="font-medium text-textPrimary">{Math.min((currentPage + 1) * limit, totalUsers)}</span> of <span className="font-medium text-textPrimary">{totalUsers}</span> users
                         </div>
                         <div className="flex space-x-2">
                             <button

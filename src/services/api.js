@@ -27,7 +27,7 @@ export const api = {
 
 export const userService = {
     getAll: (limit = 10, skip = 0) => api.get(`/users?limit=${limit}&skip=${skip}&select=firstName,lastName,email,image,role,company`),
-    search: (query) => api.get(`/users/search?q=${query}&select=firstName,lastName,email,image,role,company`),
+    search: (query, limit = 10, skip = 0) => api.get(`/users/search?q=${encodeURIComponent(query)}&limit=${limit}&skip=${skip}&select=firstName,lastName,email,image,role,company`),
 };
 
 export const orderService = {
