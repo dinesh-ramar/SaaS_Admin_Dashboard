@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { userService } from '../services/api';
 import { useFetch } from '../hooks/useFetch';
@@ -6,6 +6,7 @@ import Table from '../components/common/Table';
 import Card from '../components/common/Card';
 import Input from '../components/common/Input';
 import Badge from '../components/common/Badge';
+import { debounce } from '../utils/debounce';
 import { validateSearchTerm } from '../utils/validation';
 
 // Extracted cell renderers to resolve ESLint warnings and improve performance
@@ -32,27 +33,34 @@ const CompanyCell = (row) => (
 );
 
 const Users = () => {
+    const [inputValue, setInputValue] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
-    const [query, setQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(0);
     const limit = 10;
 
+    const applySearch = useMemo(
+        () =>
+            debounce((term) => {
+                if (!validateSearchTerm(term)) return;
+                setSearchTerm(term);
+                setCurrentPage(0);
+            }, 500),
+        []
+    );
+
     const { data, loading, error, fetchData } = useFetch(
-        query ? () => userService.search(query, limit, currentPage * limit) : () => userService.getAll(limit, currentPage * limit)
+        searchTerm ? () => userService.search(searchTerm, limit, currentPage * limit) : () => userService.getAll(limit, currentPage * limit)
     );
 
     useEffect(() => {
         fetchData();
-    }, [fetchData, currentPage, query]);
+    }, [fetchData, currentPage, searchTerm]);
 
-    useEffect(() => {
-        if (query === searchTerm || !validateSearchTerm(searchTerm)) return;
-        const timer = setTimeout(() => {
-            setCurrentPage(0);
-            setQuery(searchTerm);
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [searchTerm, query]);
+    const onSearchChange = (e) => {
+        const value = e.target.value;
+        setInputValue(value);
+        applySearch(value);
+    };
 
     const columns = [
         {
@@ -80,8 +88,8 @@ const Users = () => {
                 <div className="relative w-full sm:w-64">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-textMuted w-4 h-4" />
                     <Input
-                        value={searchTerm}
-                        onChange={e => setSearchTerm(e.target.value)}
+                        value={inputValue}
+                        onChange={onSearchChange}
                         placeholder="Search users..."
                         className="pl-10"
                     />

@@ -30,6 +30,5 @@ export const userService = {
     search: (query, limit = 10, skip = 0) => api.get(`/users/search?q=${encodeURIComponent(query)}&limit=${limit}&skip=${skip}&select=firstName,lastName,email,image,role,company`),
 };
 
-export const orderService = {
-    getAll: () => api.get('/carts'), // Using carts as orders mock
-};
+// Order CRUD + status workflow lives in orderService.ts (TypeScript)
+export { orderService } from './orderService';
