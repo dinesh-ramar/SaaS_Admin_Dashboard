@@ -49,7 +49,7 @@ const Users = () => {
     );
 
     const { data, loading, error, fetchData } = useFetch(
-        searchTerm ? () => userService.search(searchTerm) : () => userService.getAll(limit, currentPage * limit)
+        searchTerm ? () => userService.search(searchTerm, limit, currentPage * limit) : () => userService.getAll(limit, currentPage * limit)
     );
 
     useEffect(() => {
@@ -111,7 +111,7 @@ const Users = () => {
                     {/* Pagination */}
                     <div className="px-6 py-4 flex items-center justify-between border-t border-border bg-app-bg transition-colors duration-200">
                         <div className="text-sm text-textMuted">
-                            Showing <span className="font-medium text-textPrimary">{currentPage * limit + 1}</span> to <span className="font-medium text-textPrimary">{Math.min((currentPage + 1) * limit, totalUsers)}</span> of <span className="font-medium text-textPrimary">{totalUsers}</span> users
+                            Showing <span className="font-medium text-textPrimary">{totalUsers ? currentPage * limit + 1 : 0}</span> to <span className="font-medium text-textPrimary">{Math.min((currentPage + 1) * limit, totalUsers)}</span> of <span className="font-medium text-textPrimary">{totalUsers}</span> users
                         </div>
                         <div className="flex space-x-2">
                             <button

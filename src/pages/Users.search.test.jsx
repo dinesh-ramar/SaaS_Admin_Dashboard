@@ -58,7 +58,7 @@ describe('Users search race condition', () => {
         });
 
         await waitFor(() => {
-            expect(userService.search).toHaveBeenCalledWith('a');
+            expect(userService.search).toHaveBeenCalledWith('a', 10, 0);
         });
 
         await user.type(input, 'lex');
@@ -67,7 +67,7 @@ describe('Users search race condition', () => {
         });
 
         await waitFor(() => {
-            expect(userService.search).toHaveBeenCalledWith('alex');
+            expect(userService.search).toHaveBeenCalledWith('alex', 10, 0);
         });
 
         // Newer "alex" request finishes first
